@@ -1,0 +1,83 @@
+<RadzenSteps @bind-SelectedIndex="@selectedIndex" ShowStepsButtons="false">
+    <Steps>
+        <RadzenStepsItem Text="Choose Entities">
+            <RadzenCard class="my-4">
+                <div class="rz-p-sm-12 rz-text-align-center">
+                    <RadzenLabel Text="Select Entity" Component="DropDownVirtualization"
+                        Style="margin-right: 8px; vertical-align: middle;" />
+                    <RadzenDropDown AllowClear="true" AllowVirtualization="true" @bind-Value=entity
+                        Name="DropDownVirtualization" AllowFiltering="true" Data=@entities
+                        SelectedItemChanged="@OnSelectedEntityChange" Style="width: 100%; max-width: 400px;" />
+                </div>
+
+                @foreach (var selectedEntity in selectedEntites)
+                {
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Shade="Shade.Lighter" class="rz-shadow-0"
+                        id="@selectedEntity" Click="@((e) => HandlebadgeClose(selectedEntity))">
+                        @selectedEntity
+                        <RadzenBadge Shade="Shade.Lighter" BadgeStyle="BadgeStyle.Primary" IsPill="true" Text="X" />
+                    </RadzenButton>
+                }
+                <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap"
+                    JustifyContent="JustifyContent.Center" Gap="2rem">
+
+                    <div class="rz-p-12 rz-text-align-center">
+                        <RadzenCheckBox @bind-Value=@ExcludeSelected Name="ExcludeSelected" />
+                        <RadzenLabel Text="Exclude Selected" Component="ExcludeSelected"
+                            Style="margin-left: 8px; vertical-align: middle;" />
+                        <RadzenButton>
+                            Trim
+                        </RadzenButton>
+                    </div>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenStepsItem>
+        <RadzenStepsItem Text="Download">
+            <RadzenCard class="my-4"></RadzenCard>
+        </RadzenStepsItem>
+    </Steps>
+
+</RadzenSteps>
+
+@code {
+    [Parameter]
+    public string XmlData { get; set; }
+
+    int selectedIndex = 0;
+
+    private List<string> entities = new List<string>();
+    private List<string> selectedEntites = new List<string>();
+    private string entity = string.Empty;
+    private bool ExcludeSelected = false;
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(XmlData))
+        {
+            entities = Helpers.XmlHelpers.GetAllEntities(XmlData);
+        }
+        ExcludeSelected = false;
+        entity = string.Empty;
+        selectedEntites = new List<string>();
+    }
+
+    void OnSelectedEntityChange(dynamic args)
+    {
+        entity = args;
+        if (!selectedEntites.Any(x => x.Equals(entity, StringComparison.OrdinalIgnoreCase)) &&
+        entities.Any(x => x.Equals(entity, StringComparison.OrdinalIgnoreCase)))
+        {
+            selectedEntites.Add(entity);
+            entities.Remove(entity);
+            entity = string.Empty;
+        }
+    }
+    void HandlebadgeClose(string entity)
+    {
+        selectedEntites.Remove(entity);
+        entities.Add(entity);
+    }
+
+    void HandleTrim()
+    {
+    }
+}

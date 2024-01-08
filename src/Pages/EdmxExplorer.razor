@@ -1,0 +1,107 @@
+@inherits ComponentBase
+@inject NotificationService NotificationService
+
+<div class="rz-p-sm-12 rz-text-align-center">
+    <RadzenLabel Text="Select Entity" Component="DropDownVirtualization"
+        Style="margin-right: 8px; vertical-align: middle;" />
+    <RadzenDropDown AllowClear="true" @bind-Value=selectedEntity AllowVirtualization="true"
+        Name="DropDownVirtualization" AllowFiltering="true" Data=@entities SelectedItemChanged="@OnSelectedEntityChange"
+        Style="width: 100%; max-width: 400px;" />
+</div>
+
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" AllowAlternatingRows="false"
+    FilterMode="FilterMode.Advanced" AllowSorting="true" PageSize="5" AllowPaging="true"
+    PagerHorizontalAlign="HorizontalAlign.Left" ShowPagingSummary="true" Data="@selectedEntityProperties"
+    TItem="EntityProperty" ColumnWidth="300px" LogicalFilterOperator="LogicalFilterOperator.Or">
+    <Columns>
+        <RadzenDataGridColumn TItem="EntityProperty" Property="Name" Filterable="true" Title="Name" Frozen="true"
+            Width="160px" />
+        <RadzenDataGridColumn TItem="EntityProperty" Property="Type" Filterable="true" Title="Type" Width="120px"
+            Visible=@(!isEnumType) />
+        <RadzenDataGridColumn TItem="EntityProperty" Property="Nullable" Filterable="true" Title="Nullable"
+            Width="160px" Visible=@(!isEnumType) />
+        <RadzenDataGridColumn TItem="EntityProperty" Property="Key" Filterable="true" Title="Key" Width="200px"
+            Visible=@(!isEnumType) />
+        <RadzenDataGridColumn TItem="EntityProperty" Property="Value" Filterable="true" Title="Value" Width="200px"
+            Visible=@(isEnumType) />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter]
+    public string XmlData { get; set; }
+
+    string selectedEntity = string.Empty;
+    List<string> entities = new List<string>();
+    List<EntityProperty> selectedEntityProperties = new List<EntityProperty>();
+    List<EntityProperty> propertyRows = new();
+    bool isEnumType = false;
+    private List<System.Xml.XmlNode> entitiesAndEnum = new();
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(XmlData))
+        {
+            entitiesAndEnum = Helpers.XmlHelpers.GetEntityAndEnumTypes(XmlData);
+            entities = entitiesAndEnum.Select(n => n.Attributes["Name"].Value).ToList();
+        }
+        selectedEntityProperties = new();
+        propertyRows = new();
+        isEnumType = false;
+    }
+    void OnSelectedEntityChange(dynamic args)
+    {
+        selectedEntity = args;
+        if (entities.Any(x => x.Equals(selectedEntity, StringComparison.OrdinalIgnoreCase)))
+        {
+            selectedEntityProperties = GetEntityProperties();
+        }
+    }
+    private List<EntityProperty> GetEntityProperties()
+    {
+        propertyRows = new();
+        isEnumType = false;
+        var selectedEntityData = entitiesAndEnum
+        .FirstOrDefault(x => x.Attributes["Name"].Value
+        .Equals(selectedEntity, StringComparison.OrdinalIgnoreCase));
+
+        if (selectedEntityData == null)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", $"Entity {selectedEntity} not found");
+            return propertyRows;
+        }
+
+
+        var properties = selectedEntityData.ChildNodes.Cast<System.Xml.XmlNode>()
+        .Where(navProp => navProp.Name.Equals("Property")).ToList();
+        if (!properties.Any())
+        {
+            properties = selectedEntityData.ChildNodes.Cast<System.Xml.XmlNode>()
+            .Where(navProp => navProp.Name.Equals("Member")).ToList();
+        }
+        var keys = selectedEntityData.ChildNodes.Cast<System.Xml.XmlNode>()
+        .FirstOrDefault(navProp => navProp.Name.Equals("Key"))?
+        .ChildNodes.Cast<System.Xml.XmlNode>()
+        .Where(x => x.Name.Equals("PropertyRef"))?
+        .Select(x => x.Attributes["Name"].Value)?
+        .ToList();
+
+        foreach (var property in properties)
+        {
+            var row = new EntityProperty
+                {
+                    Name = property.Attributes["Name"]?.Value
+                };
+
+            if (keys?.Any() != null)
+            {
+                row.Key = keys.Contains(row.Name);
+            }
+            row.Nullable = string.IsNullOrEmpty(property.Attributes["Nullable"]?.Value);
+            row.Type = property.Attributes["Type"]?.Value;
+            row.Value = property.Attributes["Value"]?.Value;
+            isEnumType = !string.IsNullOrEmpty(row.Value);
+            propertyRows.Add(row);
+        }
+        return propertyRows;
+    }
+}
