@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "EdmxTools",
   "resources": {
-    "hash": "sha256-Jk59SAOpdyxfwF+doQGHOIfdN8/JydHuvu82hAzvugI=",
+    "hash": "sha256-NwORG2fe+L3DJxLNMJvyR+YGYcQ/k14r22BgTTe0grs=",
     "jsModuleNative": {
       "dotnet.native.8.0.0.45ykigla5r.js": "sha256-LjLDIz9+J7uuiwMlQ4HbNx2BnSpphOtO2MwkoI28vdI="
     },
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "EdmxTools.wasm": "sha256-1mZCWMX/niO1+RZvWLWZlttAr5t4iJ8DWjZTKf6i/qs=",
+      "EdmxTools.wasm": "sha256-64Lcjhut95KqkaooUo2agYwMo2fZRI76n3dwdnTsm/8=",
       "Microsoft.AspNetCore.Components.Forms.wasm": "sha256-L3rWiAi6012qD7JsgqVL3q7cOdbMfygcnkwg/kBjNWA=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-k8qTs4/P3+xTCtZvwl5LhhdyUiZXu5qxEFrfZetIzrk=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-Wl3j7HUs6Hzglb7o+lSSm1TcNprpzy2K20+qW5DpV8E=",
@@ -32,7 +32,7 @@
       "Microsoft.Extensions.Logging.wasm": "sha256-8BH+kQfjYuZWxprOICXJ4+tU0OdJOYDKN7G0S3zYYHI=",
       "Microsoft.Extensions.Options.wasm": "sha256-6DN1malfyp0G0uOYwQY0nIN60XdXpVXUXXw0X2c8V8E=",
       "Microsoft.Extensions.Primitives.wasm": "sha256-Ms2HR5Gpug/0uRAzdk4SUNT76Ml3CjFv9Jo+dUIMGac=",
-      "Microsoft.JSInterop.wasm": "sha256-MKknoRxUWb9wcnS2dxtVkxmbA39EU5I6HlNCVA9Obns=",
+      "Microsoft.JSInterop.wasm": "sha256-AT9S02ml8nGhQQ8JUuiKEMWzVIeMiOMfRtpyCGIcIAk=",
       "Microsoft.JSInterop.WebAssembly.wasm": "sha256-CQVLCKiSxLN5ghyJZG3mhnMGRROdqrbNUjtAXB0nWb8=",
       "Radzen.Blazor.wasm": "sha256-/fG/7uZIjybUYJDVr5EVVdYA5LRTzZgxXoeNqr66/CM=",
       "System.Collections.Concurrent.wasm": "sha256-I5TzWJzUvXZfidD/4fqyrGsqctDDXFz2JCz/Hcs9ElE=",
