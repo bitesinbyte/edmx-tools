@@ -1,3 +1,4 @@
+@inject IJSRuntime JSRuntime
 <RadzenSteps @bind-SelectedIndex="@selectedIndex" ShowStepsButtons="false">
     <Steps>
         <RadzenStepsItem Text="Choose Entities">
@@ -25,7 +26,7 @@
                         <RadzenCheckBox @bind-Value=@ExcludeSelected Name="ExcludeSelected" />
                         <RadzenLabel Text="Exclude Selected" Component="ExcludeSelected"
                             Style="margin-left: 8px; vertical-align: middle;" />
-                        <RadzenButton>
+                        <RadzenButton Click="@HandleTrim">
                             Trim
                         </RadzenButton>
                     </div>
@@ -33,7 +34,9 @@
             </RadzenCard>
         </RadzenStepsItem>
         <RadzenStepsItem Text="Download">
-            <RadzenCard class="my-4"></RadzenCard>
+            <RadzenCard class="my-4">
+                <RadzenButton Click="@DownloadTrimXmlFile" Text="Download" />
+            </RadzenCard>
         </RadzenStepsItem>
     </Steps>
 
@@ -49,6 +52,7 @@
     private List<string> selectedEntites = new List<string>();
     private string entity = string.Empty;
     private bool ExcludeSelected = false;
+    private string trimmedXmlData = string.Empty;
     protected override void OnParametersSet()
     {
         if (!string.IsNullOrEmpty(XmlData))
@@ -58,6 +62,7 @@
         ExcludeSelected = false;
         entity = string.Empty;
         selectedEntites = new List<string>();
+        trimmedXmlData = string.Empty;
     }
 
     void OnSelectedEntityChange(dynamic args)
@@ -79,5 +84,17 @@
 
     void HandleTrim()
     {
+        trimmedXmlData = Helpers.XmlHelpers.Trim(XmlData, selectedEntites, ExcludeSelected);
+        selectedIndex = 1;
+    }
+    async Task DownloadTrimXmlFile()
+    {
+        var byteArray = System.Text.Encoding.ASCII.GetBytes(trimmedXmlData);
+        var stream = new MemoryStream(byteArray);
+        var fileName = "trimmedMetadata.xml";
+
+        using var streamRef = new DotNetStreamReference(stream: stream);
+
+        await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
 }
