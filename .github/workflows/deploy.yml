@@ -3,9 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-
+permissions:
+  contents: write
 jobs:
   deploy-to-github-pages:
+    concurrency: ci-${{ github.ref }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
