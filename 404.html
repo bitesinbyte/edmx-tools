@@ -1,38 +1,96 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Single Page Apps for GitHub Pages</title>
-     <script type="text/javascript">
-     // Single Page Apps for GitHub Pages
-     // MIT License
-     // https://github.com/rafgraph/spa-github-pages
-     // This script takes the current url and converts the path and query
-     // string into just a query string, and then redirects the browser
-     // to the new url with only a query string and hash fragment
+<html lang="en">
 
-     // If you're creating a Project Pages site and NOT using a custom domain,
-     // then set pathSegmentsToKeep to 1 (enterprise users may need to set it to > 1).
-     // This way the code will only replace the route part of the path, and not
-     // the real directory in which the app resides, for example:
-     // https://username.github.io/repo-name/one/two?a=b&c=d#qwe becomes
-     // https://username.github.io/repo-name/?/one/two&a=b~and~c=d#qwe
-     // Otherwise, leave pathSegmentsToKeep as 0.
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EdmxTools</title>
+    <base href="https://edmx.bitesinbyte.com/" />
+    <link rel="icon" type="image/png" href="favicons/favicon.ico" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/standard.css">
+</head>
 
-     var pathSegmentsToKeep = 1;
+<body>
+    <amp-ad width="100vw" height="320"
+     type="adsense"
+     data-ad-client="ca-pub-2889277787752693"
+     data-ad-slot="9551132288"
+     data-auto-format="rspv"
+     data-full-width="">
+        <div overflow=""></div>
+    </amp-ad>
+    <div id="app" style="margin: 0 auto; width: 100vw; height: 100vh">
+        <div class="text-center pt-3" style="color: purple; font-size: 16pt">
+            Loading...
+        </div>
+        <div class="text-center mt-3">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                    style="font-size: 16pt; width: 36px; height: 36px; color: purple" />
+        </div>
+        <div class="text-center">
+            <img src="favicons/android-chrome-512x512.png" style="width:30%" alt="logo"/>
+        </div>
+    </div>
+     
+    <div id="blazor-error-ui">
+        An unhandled error has occurred. <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script>
+        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
+            const arrayBuffer = await contentStreamReference.arrayBuffer();
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const anchorElement = document.createElement('a');
+            anchorElement.href = url;
+            anchorElement.download = fileName ?? '';
+            anchorElement.click();
+            anchorElement.remove();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+    <script>
+        function removeStyleSheet(href) {
+            document.querySelector('link[href$="'+href+'"]').remove()
+        }
+        function applyDark(href) {
+            addCss("_content/Radzen.Blazor/css/dark.css");
+            removeStyleSheet("_content/Radzen.Blazor/css/standard.css");
+        }
+        function applyLight(href) {
+            addCss("_content/Radzen.Blazor/css/standard.css");
+            removeStyleSheet("_content/Radzen.Blazor/css/dark.css");
+        }
+        
+        function addCss(fileName) {
+            var head = document.head;
+            var link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = fileName;
 
-     var l = window.location;
-
-     l.replace(
-     l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-     l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-     l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-     (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-     l.hash
-     );
+            head.appendChild(link);
+        }
 
     </script>
-    </head>
-       <body>
-      </body>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-F9EC1KWJNY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-F9EC1KWJNY');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2889277787752693"
+    crossorigin="anonymous"></script>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+   </script>
+</body>
+
 </html>
