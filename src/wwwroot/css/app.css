@@ -101,3 +101,6 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+ins.adsbygoogle[data-ad-status="unfilled"] {
+    display: none !important;
+}
