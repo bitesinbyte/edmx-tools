@@ -1,17 +1,55 @@
 ﻿@page "/"
-
+@inject NavigationManager _nav
 <PageTitle>Home</PageTitle>
-
-@inject NotificationService NotificationService
 
 <RadzenStack AlignItems="AlignItems.Center" Class="rz-mx-auto rz-my-12">
     <RadzenImage Path="favicons/android-chrome-512x512.png" Style="width: 15rem;" AlternateText="Bites In Byte" />
     <RadzenText TextStyle="TextStyle.H4" Text="Bites In Byte - Edmx Tools" />
     <RadzenText TextStyle="TextStyle.Body1">
-        Effortlessly Convert <strong>EDMX</strong> to <strong>OpenAPI</strong> or <strong>Trim</strong> the Edmx
-        File
+        Set of tools to help you with your projects.
     </RadzenText>
-</RadzenStack>
-<RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.5rem"
-    Class="rz-pt-4 rz-pb-8">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Class="rz-mx-auto rz-my-12">
+        <RadzenCard Style="max-width: 300px">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-mt-2 rz-my-0">Edmx
+                Trimmer</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                Remove unused <strong>Entities</strong> from your Edmx file.
+            </RadzenText>
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+                <RadzenButton Variant="Variant.Text" Text="Open" Click="@(()=>_nav.NavigateTo("/trim"))" />
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenCard Style="max-width: 300px">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-mt-2 rz-my-0">Edmx
+                Explorer</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                Explore your Edmx file and see all the <strong>Entities</strong> and their <strong>Properties</strong>.
+            </RadzenText>
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+                <RadzenButton Variant="Variant.Text" Text="Open" Click="@(()=>_nav.NavigateTo("/explore"))" />
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenCard Style="max-width: 300px">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-mt-2 rz-my-0">Edmx
+                To Open Api Json Converter</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                Convert your Edmx file to <strong>Open Api Json</strong>.
+            </RadzenText>
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+                <RadzenButton Variant="Variant.Text" Text="Open"
+                    Click="@(()=>_nav.NavigateTo("/convert?type=open-api-json"))" />
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenCard Style="max-width: 300px">
+            <RadzenText TextStyle="TextStyle.H6" class="rz-display-flex rz-mt-2 rz-my-0">Edmx
+                To Open Api YML Converter</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">
+                Convert your Edmx file to <strong>Open Api YML</strong>.
+            </RadzenText>
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0">
+                <RadzenButton Variant="Variant.Text" Text="Open"
+                    Click="@(()=>_nav.NavigateTo("/convert?type=open-api-yml"))" />
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenStack>
 </RadzenStack>

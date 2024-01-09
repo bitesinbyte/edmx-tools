@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime JSRuntime
+@inject NavigationManager _nav
+
 <RadzenComponents />
 <RadzenLayout>
     <RadzenHeader>
@@ -17,7 +19,10 @@
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
                         JustifyContent="JustifyContent.End">
                         <RadzenToggleButton Click=@ToggleMode Icon="@modeIcon" ButtonStyle="ButtonStyle.Light"
+                            Variant="Variant.Outlined" Shade="Shade.Lighter"
                             InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "ToggleButton with image" }})" />
+                        <RadzenButton Click="@(()=>_nav.NavigateTo("https://www.bitesinbyte.com"))" Icon="public"
+                            Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Light" Shade="Shade.Lighter" />
                         <a href="https://github.com/bitesinbyte/edmx-tools" title="GitHub" target="_blank"
                             class="rz-mx-4">
                             <svg width="24" height="24" viewBox="0 0 512 499.36" xmlns="http://www.w3.org/2000/svg">
@@ -27,8 +32,11 @@
                                 </path>
                             </svg>
                         </a>
+                        <RadzenButton Click="@(()=>_nav.NavigateTo("https://blogs.bitesinbyte.com"))" Icon="article"
+                            Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Light" Shade="Shade.Lighter" />
+                        <RadzenButton Click="@(()=>_nav.NavigateTo("https://links.bitesinbyte.com"))" Icon="share"
+                            Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Light" Shade="Shade.Lighter" />
                     </RadzenStack>
-
                 </RadzenColumn>
             </RadzenRow>
         </ChildContent>
@@ -39,16 +47,12 @@
             DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)"
             ShowArrow="false">
             <RadzenPanelMenuItem Text="Home" Icon="home" Path="/" />
-            <RadzenPanelMenuItem Text="Tools" Icon="build">
-                <RadzenPanelMenuItem Text="Trim" Path="trim" Icon="content_cut"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="Explore" Path="explore" Icon="explore"></RadzenPanelMenuItem>
-                <RadzenPanelMenuItem Text="Convert" Icon="transform">
-                    <RadzenPanelMenuItem Text="OpenApi - JSON" Path="textarea" Icon="code"></RadzenPanelMenuItem>
-                    <RadzenPanelMenuItem Text="OpenApi - YML" Path="textarea" Icon="code"></RadzenPanelMenuItem>
-                </RadzenPanelMenuItem>
-
+            <RadzenPanelMenuItem Text="Tools" Icon="build" Expanded="true">
+                <RadzenPanelMenuItem Text="Trim" Path="trim" Icon="content_cut" />
+                <RadzenPanelMenuItem Text="Explore" Path="explore" Icon="explore" />
+                <RadzenPanelMenuItem Text="OpenApi - JSON" Path="edmx-to-openapi-json" Icon="sync" />
+                <RadzenPanelMenuItem Text="OpenApi - YML" Path="edmx-to-openapi-yml" Icon="sync" />
             </RadzenPanelMenuItem>
-
         </RadzenPanelMenu>
     </RadzenSidebar>
     <RadzenBody>
@@ -76,7 +80,7 @@
 </RadzenLayout>
 
 @code {
-    bool sidebarExpanded = true;
+    bool sidebarExpanded = false;
     string modeIcon = "dark_mode";
 
     async Task ToggleMode()
