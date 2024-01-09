@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="css/app.css">
     <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/standard-base.css">
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/standard.css">
 </head>
 
 <body>
@@ -43,6 +43,29 @@
             anchorElement.remove();
             URL.revokeObjectURL(url);
         }
+    </script>
+    <script>
+        function removeStyleSheet(href) {
+            document.querySelector('link[href$="'+href+'"]').remove()
+        }
+        function applyDark(href) {
+            addCss("_content/Radzen.Blazor/css/dark.css");
+            removeStyleSheet("_content/Radzen.Blazor/css/standard.css");
+        }
+        function applyLight(href) {
+            addCss("_content/Radzen.Blazor/css/standard.css");
+            removeStyleSheet("_content/Radzen.Blazor/css/dark.css");
+        }
+        
+        function addCss(fileName) {
+            var head = document.head;
+            var link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = fileName;
+
+            head.appendChild(link);
+        }
+
     </script>
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
