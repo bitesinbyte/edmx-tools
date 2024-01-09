@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject IJSRuntime JSRuntime
 @inject NavigationManager _nav
-
+@inject TooltipService tooltipService
 <RadzenComponents />
 <RadzenLayout>
     <RadzenHeader>
@@ -48,10 +48,14 @@
             ShowArrow="false">
             <RadzenPanelMenuItem Text="Home" Icon="home" Path="/" />
             <RadzenPanelMenuItem Text="Tools" Icon="build" Expanded="true">
-                <RadzenPanelMenuItem Text="Trim" Path="trim" Icon="content_cut" />
-                <RadzenPanelMenuItem Text="Explore" Path="explore" Icon="explore" />
-                <RadzenPanelMenuItem Text="OpenApi - JSON" Path="convert?type=open-api-json" Icon="sync" />
-                <RadzenPanelMenuItem Text="OpenApi - YML" Path="convert?type=open-api-yml" Icon="sync" />
+                <RadzenPanelMenuItem Text="Trim" Path="trim" Icon="content_cut"
+                    MouseEnter="@(args => ShowTooltip(args,"Trim Edmx", new TooltipOptions(){ Position = TooltipPosition.Right }))" />
+                <RadzenPanelMenuItem Text="Explore" Path="explore" Icon="explore"
+                    MouseEnter="@(args => ShowTooltip(args,"Explore Edmx", new TooltipOptions(){ Position = TooltipPosition.Right }))" />
+                <RadzenPanelMenuItem Text="OpenApi - JSON" Path="convert?type=open-api-json" Icon="settings"
+                    MouseEnter="@(args => ShowTooltip(args,"Edmx to Open Api JSON", new TooltipOptions(){ Position = TooltipPosition.Right }))" />
+                <RadzenPanelMenuItem Text="OpenApi - YML" Path="convert?type=open-api-yml" Icon="settings"
+                    MouseEnter="@(args => ShowTooltip(args,"Edmx to Open Api YML", new TooltipOptions(){ Position = TooltipPosition.Right }))" />
             </RadzenPanelMenuItem>
         </RadzenPanelMenu>
     </RadzenSidebar>
@@ -82,7 +86,8 @@
 @code {
     bool sidebarExpanded = false;
     string modeIcon = "dark_mode";
-
+    void ShowTooltip(ElementReference elementReference, string content, TooltipOptions options = null) =>
+    tooltipService.Open(elementReference, content, options);
     async Task ToggleMode()
     {
         if (modeIcon == "light_mode")

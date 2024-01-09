@@ -1,8 +1,93 @@
 @page "/convert"
+@inject NavigationManager NavManager
+@inject TooltipService tooltipService
+@inject IJSRuntime JSRuntime
 
-@inject NotificationService NotificationService
-
-Coming soon..
+<PageTitle>Convert Edmx to @ConvertType</PageTitle>
+<RadzenText TextStyle="TextStyle.H4">Convert To @ConvertType</RadzenText>
+<Upload @bind-XmlData=XmlData />
+<RadzenButton Click="@HandleConvert" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary"
+    ButtonType="ButtonType.Button"
+    MouseEnter="@(args => ShowTooltip(args,"Convert Edmx", new TooltipOptions(){ Position = TooltipPosition.Bottom }))">
+    Convert To @ConvertType</RadzenButton>
+<RadzenButton Click="@HandleDownload" Variant="Variant.Filled" Icon="file_download" ButtonStyle="ButtonStyle.Primary"
+    ButtonType="ButtonType.Button" Disabled="@DownloadDisabled" Text="Download"
+    MouseEnter="@(args => ShowTooltip(args,"Download The Converted Edmx", new TooltipOptions(){ Position = TooltipPosition.Bottom }))" />
 @code {
+    private string convertedValue = string.Empty;
+    public string XmlData { get; set; }
+    bool DownloadDisabled => string.IsNullOrEmpty(convertedValue);
+    private string ConvertType
+    {
+        get
+        {
+            if (type == "open-api-yml")
+            {
+                return "Open Api YML";
+            }
+            else if (type == "open-api-json")
+            {
+                return "Open Api JSON";
+            }
+            return string.Empty;
+        }
+    }
+    private string type = string.Empty;
+    protected override void OnInitialized()
+    {
+        NavManager.LocationChanged += OnLocationChanged;
+    }
+    protected override void OnParametersSet()
+    {
+        SetType();
+        StateHasChanged();
+    }
+    private void SetType()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
 
+        var foundQueryParameter = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("type", out
+        var tempConverType);
+        if (foundQueryParameter)
+        {
+            type = tempConverType;
+        }
+    }
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        SetType();
+        StateHasChanged();
+        convertedValue = string.Empty;
+    }
+    async Task HandleDownload()
+    {
+        var fileName = type; ;
+        if (type == "open-api-yml")
+        {
+            fileName += ".yml";
+        }
+        else if (type == "open-api-json")
+        {
+            fileName += ".json";
+        }
+        var byteArray = System.Text.Encoding.ASCII.GetBytes(convertedValue);
+        var stream = new MemoryStream(byteArray);
+
+        using var streamRef = new DotNetStreamReference(stream: stream);
+
+        await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
+    void HandleConvert()
+    {
+        if (type == "open-api-yml")
+        {
+            convertedValue = OpenApiHelper.Convert(XmlData, Microsoft.OpenApi.OpenApiFormat.Yaml);
+        }
+        else if (type == "open-api-json")
+        {
+            convertedValue = OpenApiHelper.Convert(XmlData, Microsoft.OpenApi.OpenApiFormat.Json);
+        }
+    }
+    void ShowTooltip(ElementReference elementReference, string content, TooltipOptions options = null) =>
+    tooltipService.Open(elementReference, content, options);
 }
