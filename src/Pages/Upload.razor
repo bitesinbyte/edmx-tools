@@ -1,0 +1,25 @@
+@inject NotificationService NotificationService
+<RadzenCard class="my-4">
+    <RadzenText TextStyle="TextStyle.H6" Text="Upload Edmx File" />
+    <InputFile OnChange="@SingleUpload" />
+</RadzenCard>
+
+
+@code {
+    [Parameter]
+    public string XmlData { get; set; }
+
+    [Parameter]
+    public EventCallback<string> XmlDataChanged { get; set; }
+    private string fileName = string.Empty;
+
+    private async Task SingleUpload(InputFileChangeEventArgs e)
+    {
+        var ms = new MemoryStream();
+        await e.File.OpenReadStream().CopyToAsync(ms);
+        var byteArray = ms.ToArray();
+        XmlData = System.Text.Encoding.Default.GetString(byteArray);
+        NotificationService.Notify(NotificationSeverity.Success, $"Upload {fileName} Successful", "Upload Successful");
+        await XmlDataChanged.InvokeAsync(XmlData);
+    }
+}

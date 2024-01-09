@@ -1,6 +1,10 @@
+@page "/explore"
 @inherits ComponentBase
 @inject NotificationService NotificationService
+<PageTitle>Edmx Explorer</PageTitle>
 
+<RadzenText TextStyle="TextStyle.H1" Text="Edmx Explorer" />
+<Upload @bind-XmlData=XmlData />
 <div class="rz-p-sm-12 rz-text-align-center">
     <RadzenLabel Text="Select Entity" Component="DropDownVirtualization"
         Style="margin-right: 8px; vertical-align: middle;" />
@@ -28,22 +32,37 @@
 </RadzenDataGrid>
 
 @code {
-    [Parameter]
     public string XmlData { get; set; }
 
     string selectedEntity = string.Empty;
-    List<string> entities = new List<string>();
+    List<string> entities
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(XmlData))
+            {
+                return entitiesAndEnum.Select(n => n.Attributes["Name"].Value).ToList();
+            }
+            return new();
+        }
+    }
     List<EntityProperty> selectedEntityProperties = new List<EntityProperty>();
     List<EntityProperty> propertyRows = new();
     bool isEnumType = false;
-    private List<System.Xml.XmlNode> entitiesAndEnum = new();
+    private List<System.Xml.XmlNode> entitiesAndEnum
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(XmlData))
+            {
+                return Helpers.XmlHelpers.GetEntityAndEnumTypes(XmlData);
+            }
+            return new();
+        }
+    }
     protected override void OnParametersSet()
     {
-        if (!string.IsNullOrEmpty(XmlData))
-        {
-            entitiesAndEnum = Helpers.XmlHelpers.GetEntityAndEnumTypes(XmlData);
-            entities = entitiesAndEnum.Select(n => n.Attributes["Name"].Value).ToList();
-        }
+
         selectedEntityProperties = new();
         propertyRows = new();
         isEnumType = false;

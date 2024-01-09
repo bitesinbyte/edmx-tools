@@ -14,41 +14,4 @@
 </RadzenStack>
 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="0.5rem"
     Class="rz-pt-4 rz-pb-8">
-    <RadzenCard class="my-4">
-        <RadzenText TextStyle="TextStyle.H6" Text="Upload Edmx File" />
-        <InputFile OnChange="@SingleUpload" />
-    </RadzenCard>
 </RadzenStack>
-
-
-<RadzenCard hidden=@isTabHidden>
-    <RadzenTabs RenderMode="TabRenderMode.Client">
-        <Tabs>
-            <RadzenTabsItem Text="Explore">
-                <EdmxExplorer XmlData=@xmlData />
-            </RadzenTabsItem>
-            <RadzenTabsItem Text="Trim">
-                <EdmxTrim XmlData=@xmlData />
-            </RadzenTabsItem>
-        </Tabs>
-    </RadzenTabs>
-
-</RadzenCard>
-
-@code {
-
-    bool isTabHidden = true;
-    private string xmlData = string.Empty;
-    private string fileName = string.Empty;
-
-    private async Task SingleUpload(InputFileChangeEventArgs e)
-    {
-        var ms = new MemoryStream();
-        await e.File.OpenReadStream().CopyToAsync(ms);
-        var byteArray = ms.ToArray();
-        xmlData = System.Text.Encoding.Default.GetString(byteArray);
-        isTabHidden = false;
-        NotificationService.Notify(NotificationSeverity.Success, $"Upload {fileName} Successful", "Upload Successful");
-        await InvokeAsync(StateHasChanged);
-    }
-}

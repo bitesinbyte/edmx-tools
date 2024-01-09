@@ -1,4 +1,8 @@
+@page "/Trim"
 @inject IJSRuntime JSRuntime
+<PageTitle>Edmx Trim</PageTitle>
+<RadzenText TextStyle="TextStyle.H1" Text="Edmx Trimmer" />
+<Upload @bind-XmlData=XmlData />
 <RadzenSteps @bind-SelectedIndex="@selectedIndex" ShowStepsButtons="false">
     <Steps>
         <RadzenStepsItem Text="Choose Entities">
@@ -43,28 +47,23 @@
 </RadzenSteps>
 
 @code {
-    [Parameter]
     public string XmlData { get; set; }
-
     int selectedIndex = 0;
-
-    private List<string> entities = new List<string>();
+    private List<string> entities
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(XmlData))
+            {
+                return Helpers.XmlHelpers.GetAllEntities(XmlData);
+            }
+            return new();
+        }
+    }
     private List<string> selectedEntites = new List<string>();
     private string entity = string.Empty;
     private bool ExcludeSelected = false;
     private string trimmedXmlData = string.Empty;
-    protected override void OnParametersSet()
-    {
-        if (!string.IsNullOrEmpty(XmlData))
-        {
-            entities = Helpers.XmlHelpers.GetAllEntities(XmlData);
-        }
-        ExcludeSelected = false;
-        entity = string.Empty;
-        selectedEntites = new List<string>();
-        trimmedXmlData = string.Empty;
-    }
-
     void OnSelectedEntityChange(dynamic args)
     {
         entity = args;
