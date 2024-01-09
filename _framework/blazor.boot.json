@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "EdmxTools",
   "resources": {
-    "hash": "sha256-x7L9x5xE1AmUBzSscr3S7O7nAA72zzHxaWDzYpP/YaY=",
+    "hash": "sha256-aNWkrULS7nYzLkwltk0csWbbo+suR0CpvMNcpjOx640=",
     "jsModuleNative": {
       "dotnet.native.8.0.1.ahpp78valh.js": "sha256-SGOlISx+3G4kkvpC9Uq3qoPGsnjxGmW61QBev0lyI5U="
     },
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "EdmxTools.wasm": "sha256-/n4S6taD3rK220gKjbtrzZ5XVyqI0L9ju02dZcrQuH8=",
+      "EdmxTools.wasm": "sha256-i+E2y/fI8ao1GtFdVL4sH/zIo4BW6dd67AAi16Fuc78=",
       "Microsoft.AspNetCore.Components.Forms.wasm": "sha256-L3rWiAi6012qD7JsgqVL3q7cOdbMfygcnkwg/kBjNWA=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-Sg+D4WWkZy/uEl3J5AhRdVRHzxL1uCqTh6KRyv3JBbY=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-Wl3j7HUs6Hzglb7o+lSSm1TcNprpzy2K20+qW5DpV8E=",
