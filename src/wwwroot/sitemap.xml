@@ -1,0 +1,24 @@
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+    xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+    <url>
+        <loc>https://edmx.bitesinbyte.com</loc>
+        <lastmod>2024-01-07T19:03:12+01:00</lastmod>
+    </url>
+    <url>
+        <loc>https://edmx.bitesinbyte.com/trim</loc>
+        <lastmod>2024-01-07T19:03:12+01:00</lastmod>
+    </url>
+    <url>
+        <loc>https://edmx.bitesinbyte.com/explore</loc>
+        <lastmod>2024-01-07T19:03:12+01:00</lastmod>
+    </url>
+    <url>
+        <loc>https://edmx.bitesinbyte.com/convert?type=open-api-json</loc>
+        <lastmod>2024-01-07T19:03:12+01:00</lastmod>
+    </url>
+    <url>
+        <loc>https://edmx.bitesinbyte.com/convert?type=open-api-yml</loc>
+        <lastmod>2024-01-07T19:03:12+01:00</lastmod>
+    </url>
+</urlset>
