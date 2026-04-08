@@ -10,35 +10,30 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          dotnet-version: 10.x
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
 
-      - name: Restore dependencies
-        run: dotnet restore src/EdmxTools.csproj
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build
-        run: dotnet build src/EdmxTools.csproj -c Release --no-restore
-
-      - name: Publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: dotnet publish src/EdmxTools.csproj -c Release -o release --nologo
-
-      - name: Prepare for GitHub Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          sed -i 's/<base href="\/" \/>/<base href="https\:\/\/edmx.bitesinbyte.com\/" \/>/g' release/wwwroot/index.html
-          cp release/wwwroot/index.html release/wwwroot/404.html
-          touch release/wwwroot/.nojekyll
+        run: npm run build
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: release/wwwroot
+          folder: web/dist
