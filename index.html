@@ -1,94 +1,40 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8" />
+  <head>
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description"
-        content="A set of tools for EDMX and OData metadata files: EDMX Explorer, EDMX Trimmer, EDMX to OpenAPI JSON/YAML converter. All processing happens in your browser." />
-    <meta name="keywords"
-        content="EDMX, OpenAPI, OData, EDMX Trimmer, EDMX Explorer, EDMX to JSON, EDMX to YAML, D365 FO, OData metadata" />
-    <title>Edmx Tools | bitesinbyte</title>
-    <base href="https://edmx.bitesinbyte.com/" />
-    <link rel="icon" type="image/png" href="favicons/favicon.ico" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/standard.css" />
-    <link href="manifest.webmanifest" rel="manifest" />
-    <link rel="apple-touch-icon" sizes="512x512" href="favicons/android-chrome-512x512.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="favicons/android-chrome-192x192.png" />
-</head>
+    <title>EDMX Tools - Client-Side EDMX &amp; OData Utilities</title>
+    <meta name="description" content="Free client-side tools for trimming, exploring, and converting EDMX/OData metadata files. No data leaves your browser." />
+    <meta name="keywords" content="edmx, odata, openapi, trimmer, explorer, converter, metadata, csdl" />
+    <meta name="author" content="bitesinbyte" />
 
-<body>
-    <div id="app" style="margin: 0 auto; width: 100vw; height: 100vh">
-        <div class="loading-container">
-            <img src="favicons/android-chrome-512x512.png" class="loading-logo" alt="Edmx Tools logo" />
-            <div class="loading-text">Loading Edmx Tools...</div>
-            <div class="loading-spinner" role="status" aria-label="Loading">
-                <span class="spinner-border spinner-border-sm"></span>
-            </div>
-        </div>
-    </div>
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
+    <link rel="icon" href="/favicons/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#03173d" />
+    <meta name="msapplication-TileImage" content="/favicons/mstile-150x150.png" />
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">X</a>
-    </div>
-
-    <script>
-        window.downloadFileFromStream = async (fileName, contentStreamReference) => {
-            const arrayBuffer = await contentStreamReference.arrayBuffer();
-            const blob = new Blob([arrayBuffer]);
-            const url = URL.createObjectURL(blob);
-            const anchorElement = document.createElement("a");
-            anchorElement.href = url;
-            anchorElement.download = fileName ?? "";
-            anchorElement.click();
-            anchorElement.remove();
-            URL.revokeObjectURL(url);
-        };
-
-        function removeStyleSheet(href) {
-            const link = document.querySelector('link[href$="' + href + '"]');
-            if (link) link.remove();
-        }
-
-        function addCss(fileName) {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = fileName;
-            document.head.appendChild(link);
-        }
-
-        function applyDark() {
-            addCss("_content/Radzen.Blazor/css/dark.css");
-            removeStyleSheet("_content/Radzen.Blazor/css/standard.css");
-        }
-
-        function applyLight() {
-            addCss("_content/Radzen.Blazor/css/standard.css");
-            removeStyleSheet("_content/Radzen.Blazor/css/dark.css");
-        }
-    </script>
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+    <!-- Open Graph -->
+    <meta property="og:title" content="EDMX Tools" />
+    <meta property="og:description" content="Free client-side tools for trimming, exploring, and converting EDMX/OData metadata files." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://edmx.bitesinbyte.com" />
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F9EC1KWJNY"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag("js", new Date());
-        gtag("config", "G-F9EC1KWJNY");
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-F9EC1KWJNY');
     </script>
-
-    <script>
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("service-worker.js");
-        }
-    </script>
-</body>
-
+    <script type="module" crossorigin src="/assets/index-CiulLHPe.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-OeRfvLIZ.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
 </html>

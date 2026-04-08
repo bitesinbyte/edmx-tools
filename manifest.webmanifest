@@ -1,22 +1,23 @@
 {
-  "name": "bitesinbyte Edmx Tools",
-  "short_name": "edmx_tools",
-  "id": "./",
-  "start_url": "./",
+  "name": "EDMX Tools",
+  "short_name": "EDMX Tools",
+  "id": "/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#03173d",
   "prefer_related_applications": false,
+  "description": "Client-side tools for trimming, exploring, and converting EDMX/OData metadata files.",
   "icons": [
     {
-      "src": "favicons/android-chrome-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    },
-    {
-      "src": "favicons/android-chrome-192x192.png",
+      "src": "/favicons/android-chrome-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
+    },
+    {
+      "src": "/favicons/android-chrome-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ]
 }
