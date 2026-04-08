@@ -72,7 +72,7 @@ export function AppLayout() {
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-7 w-7" />
+            <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-7 w-7 dark:invert dark:brightness-90" />
             <span className="font-semibold text-sm tracking-tight">EDMX Tools</span>
           </Link>
 
@@ -149,7 +149,7 @@ export function AppLayout() {
             {/* Brand */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-7 w-7" />
+                <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-7 w-7 dark:invert dark:brightness-90" />
                 <span className="font-semibold text-sm">EDMX Tools</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">

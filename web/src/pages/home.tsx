@@ -41,7 +41,7 @@ export default function HomePage() {
             <span>No data leaves your browser</span>
           </div>
 
-          <img src="/favicons/android-chrome-512x512.png" alt="EDMX Tools" className="w-20 h-20 mx-auto" />
+          <img src="/favicons/android-chrome-512x512.png" alt="EDMX Tools" className="w-20 h-20 mx-auto dark:invert dark:brightness-90" />
 
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
             <span className="bg-gradient-to-r from-foreground/70 via-foreground to-foreground/70 bg-clip-text text-transparent">
