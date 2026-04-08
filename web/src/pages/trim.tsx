@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getAllEntities, trimEdmx } from "@/lib/edmx-helpers";
 import { downloadFile } from "@/lib/file-utils";
@@ -65,67 +64,64 @@ export default function TrimPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="mx-auto max-w-3xl px-4 py-12 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Edmx Trimmer</h1>
-        <p className="text-muted-foreground text-sm mt-1">Upload an EDMX file and select entities to keep or exclude.</p>
+        <h1 className="text-3xl font-bold tracking-tight">EDMX Trimmer</h1>
+        <p className="text-muted-foreground mt-2 leading-relaxed">Upload an EDMX file and select entities to keep or exclude.</p>
       </div>
 
       <FileUpload onFileLoaded={handleFileLoaded} />
 
       {allEntities.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Select Entities</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <Select onValueChange={handleSelectEntity} value="">
-              <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Choose an entity..." />
-              </SelectTrigger>
-              <SelectContent>
-                {availableEntities.map((e) => (
-                  <SelectItem key={e} value={e}>{e}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="rounded-xl border bg-card p-6 space-y-5">
+          <h2 className="text-lg font-semibold">Select Entities</h2>
 
-            {selectedEntities.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {selectedEntities.map((e) => (
-                  <Badge key={e} variant="secondary" className="gap-1 pr-1">
-                    {e}
-                    <button onClick={() => handleRemoveEntity(e)} className="ml-1 rounded-full hover:bg-muted p-0.5">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
+          <Select onValueChange={handleSelectEntity} value="">
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Choose an entity..." />
+            </SelectTrigger>
+            <SelectContent>
+              {availableEntities.map((e) => (
+                <SelectItem key={e} value={e}>{e}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="exclude"
-                  checked={excludeSelected}
-                  onCheckedChange={(checked) => setExcludeSelected(checked)}
-                />
-                <Label htmlFor="exclude">Exclude Selected</Label>
-              </div>
-              <Button onClick={handleTrim} disabled={selectedEntities.length === 0}>
-                <Scissors className="h-4 w-4 mr-2" /> Trim
-              </Button>
+          {selectedEntities.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedEntities.map((e) => (
+                <Badge key={e} variant="secondary" className="gap-1 pr-1 transition-colors">
+                  {e}
+                  <button onClick={() => handleRemoveEntity(e)} className="ml-1 rounded-full hover:bg-foreground/10 p-0.5 transition-colors">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
             </div>
-          </CardContent>
-        </Card>
+          )}
+
+          <div className="flex items-center gap-4 pt-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="exclude"
+                checked={excludeSelected}
+                onCheckedChange={(checked) => setExcludeSelected(checked)}
+              />
+              <Label htmlFor="exclude">Exclude Selected</Label>
+            </div>
+            <Button onClick={handleTrim} disabled={selectedEntities.length === 0}>
+              <Scissors className="h-4 w-4 mr-2" /> Trim
+            </Button>
+          </div>
+        </div>
       )}
 
       {trimmedData && (
-        <Card>
-          <CardContent className="py-4">
-            <Button onClick={handleDownload}>
-              <Download className="h-4 w-4 mr-2" /> Download Trimmed File
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border bg-card p-6">
+          <Button onClick={handleDownload}>
+            <Download className="h-4 w-4 mr-2" /> Download Trimmed File
+          </Button>
+        </div>
       )}
     </div>
   );

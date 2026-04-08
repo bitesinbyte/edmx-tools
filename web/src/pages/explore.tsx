@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
 import { FileUpload } from "@/components/file-upload";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -46,69 +45,68 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="mx-auto max-w-4xl px-4 py-12 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Edmx Explorer</h1>
-        <p className="text-muted-foreground text-sm mt-1">Browse EntityTypes and EnumTypes in your EDMX file.</p>
+        <h1 className="text-3xl font-bold tracking-tight">EDMX Explorer</h1>
+        <p className="text-muted-foreground mt-2 leading-relaxed">Browse EntityTypes and EnumTypes in your EDMX file.</p>
       </div>
 
       <FileUpload onFileLoaded={handleFileLoaded} />
 
       {entityNames.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Select Entity or Enum</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <Select onValueChange={handleEntityChange} value={selectedEntity}>
-              <SelectTrigger className="w-full max-w-md">
-                <SelectValue placeholder="Choose an entity..." />
-              </SelectTrigger>
-              <SelectContent>
-                {entityNames.map((name) => (
-                  <SelectItem key={name} value={name}>{name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="rounded-xl border bg-card p-6 space-y-5">
+          <h2 className="text-lg font-semibold">Select Entity or Enum</h2>
 
-            {properties.length > 0 && (
-              <>
-                <Input
-                  placeholder="Filter properties..."
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="max-w-sm"
-                />
-                <div className="rounded-md border overflow-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        {!isEnum && <TableHead>Type</TableHead>}
-                        {!isEnum && <TableHead>Nullable</TableHead>}
-                        {!isEnum && <TableHead>Key</TableHead>}
-                        {isEnum && <TableHead>Value</TableHead>}
+          <Select onValueChange={handleEntityChange} value={selectedEntity}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Choose an entity..." />
+            </SelectTrigger>
+            <SelectContent>
+              {entityNames.map((name) => (
+                <SelectItem key={name} value={name}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {properties.length > 0 && (
+            <>
+              <Input
+                placeholder="Filter properties..."
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="max-w-sm"
+              />
+              <div className="rounded-lg border overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      {!isEnum && <TableHead>Type</TableHead>}
+                      {!isEnum && <TableHead>Nullable</TableHead>}
+                      {!isEnum && <TableHead>Key</TableHead>}
+                      {isEnum && <TableHead>Value</TableHead>}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProperties.map((p) => (
+                      <TableRow key={p.name}>
+                        <TableCell className="font-medium">{p.name}</TableCell>
+                        {!isEnum && <TableCell><code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">{p.type ?? "-"}</code></TableCell>}
+                        {!isEnum && <TableCell>{p.nullable ? <Badge variant="outline">Yes</Badge> : <Badge variant="secondary">No</Badge>}</TableCell>}
+                        {!isEnum && <TableCell>{p.key ? <Badge>Key</Badge> : <span className="text-muted-foreground">-</span>}</TableCell>}
+                        {isEnum && <TableCell className="font-mono text-sm">{p.value ?? "-"}</TableCell>}
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredProperties.map((p) => (
-                        <TableRow key={p.name}>
-                          <TableCell className="font-medium">{p.name}</TableCell>
-                          {!isEnum && <TableCell><code className="text-xs bg-muted px-1 py-0.5 rounded">{p.type ?? "-"}</code></TableCell>}
-                          {!isEnum && <TableCell>{p.nullable ? <Badge variant="outline">Yes</Badge> : <Badge variant="secondary">No</Badge>}</TableCell>}
-                          {!isEnum && <TableCell>{p.key ? <Badge>Key</Badge> : "-"}</TableCell>}
-                          {isEnum && <TableCell>{p.value ?? "-"}</TableCell>}
-                        </TableRow>
-                      ))}
-                      {filteredProperties.length === 0 && (
-                        <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No properties found</TableCell></TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                <p className="text-xs text-muted-foreground">{filteredProperties.length} of {properties.length} properties</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+                    ))}
+                    {filteredProperties.length === 0 && (
+                      <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No properties found</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              <p className="text-xs text-muted-foreground">{filteredProperties.length} of {properties.length} properties</p>
+            </>
+          )}
+        </div>
       )}
     </div>
   );

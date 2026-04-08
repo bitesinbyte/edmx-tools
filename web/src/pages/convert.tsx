@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FileUpload } from "@/components/file-upload";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { convertToOpenApi } from "@/lib/openapi-helpers";
 import { downloadFile } from "@/lib/file-utils";
 import { toast } from "sonner";
@@ -15,7 +14,7 @@ export default function ConvertPage() {
   const [convertedValue, setConvertedValue] = useState<string | null>(null);
   const [isConverting, setIsConverting] = useState(false);
 
-  const formatLabel = useMemo(() => (type === "open-api-yml" ? "OpenApi YML" : "OpenApi JSON"), [type]);
+  const formatLabel = useMemo(() => (type === "open-api-yml" ? "OpenAPI YAML" : "OpenAPI JSON"), [type]);
 
   const handleFileLoaded = useCallback((content: string) => {
     setXmlData(content);
@@ -49,15 +48,15 @@ export default function ConvertPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="mx-auto max-w-3xl px-4 py-12 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Convert to {formatLabel}</h1>
-        <p className="text-muted-foreground text-sm mt-1">Upload an EDMX file and convert it to {formatLabel} format.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Convert to {formatLabel}</h1>
+        <p className="text-muted-foreground mt-2 leading-relaxed">Upload an EDMX file and convert it to {formatLabel} format.</p>
       </div>
 
       <FileUpload onFileLoaded={handleFileLoaded} />
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         <Button onClick={handleConvert} disabled={!xmlData || isConverting}>
           {isConverting ? <><RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Converting...</> : <>Convert to {formatLabel}</>}
         </Button>
@@ -67,11 +66,9 @@ export default function ConvertPage() {
       </div>
 
       {convertedValue && (
-        <Card>
-          <CardContent className="py-4">
-            <pre className="text-xs overflow-auto max-h-96 bg-muted p-4 rounded-md"><code>{convertedValue}</code></pre>
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border bg-card p-6">
+          <pre className="text-xs overflow-auto max-h-96 bg-muted/50 p-4 rounded-lg font-mono"><code>{convertedValue}</code></pre>
+        </div>
       )}
     </div>
   );

@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { Moon, Sun, Menu, Home, Scissors, Search, FileJson, FileText, Heart, Globe, BookOpen, Share2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
+import { Moon, Sun, Menu, X, Heart, Globe, BookOpen, Share2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
@@ -17,42 +14,33 @@ function GitHubIcon({ className }: { className?: string }) {
 }
 
 const navItems = [
-  { path: "/", label: "Home", icon: Home },
-  { path: "/trim", label: "Trim", icon: Scissors },
-  { path: "/explore", label: "Explore", icon: Search },
-  { path: "/convert?type=open-api-json", label: "OpenApi - JSON", icon: FileJson },
-  { path: "/convert?type=open-api-yml", label: "OpenApi - YML", icon: FileText },
+  { path: "/trim", label: "Trim" },
+  { path: "/explore", label: "Explore" },
+  { path: "/convert?type=open-api-json", label: "JSON" },
+  { path: "/convert?type=open-api-yml", label: "YAML" },
 ];
 
-function NavLink({ path, label, icon: Icon, isActive, onClick }: {
-  path: string; label: string; icon: React.ComponentType<{ className?: string }>;
-  isActive: boolean; onClick?: () => void;
+function NavLink({ path, label, isActive, onClick }: {
+  path: string; label: string; isActive: boolean; onClick?: () => void;
 }) {
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Link
-            to={path}
-            onClick={onClick}
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}
-          />
-        }
-      >
-        <Icon className="h-4 w-4 shrink-0" />
-        <span>{label}</span>
-      </TooltipTrigger>
-      <TooltipContent side="right">{label}</TooltipContent>
-    </Tooltip>
+    <Link
+      to={path}
+      onClick={onClick}
+      className={cn(
+        "relative px-3 py-2 text-sm font-medium transition-colors",
+        "after:absolute after:bottom-0 after:left-1 after:h-[2px] after:bg-foreground after:transition-all after:duration-300",
+        isActive
+          ? "text-foreground after:w-[calc(100%-8px)]"
+          : "text-muted-foreground hover:text-foreground after:w-0 hover:after:w-[calc(100%-8px)]"
+      )}
+    >
+      {label}
+    </Link>
   );
 }
 
-function HeaderIconLink({ href, tooltip, children }: {
+function IconLink({ href, tooltip, children }: {
   href: string; tooltip: string; children: React.ReactNode;
 }) {
   return (
@@ -60,7 +48,7 @@ function HeaderIconLink({ href, tooltip, children }: {
       <TooltipTrigger
         render={
           <a href={href} target="_blank" rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center justify-center rounded-lg text-sm font-medium transition-all outline-none select-none hover:bg-muted hover:text-foreground size-8"
+            className="inline-flex items-center justify-center rounded-md h-10 w-10 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           />
         }
       >
@@ -74,101 +62,132 @@ function HeaderIconLink({ href, tooltip, children }: {
 export function AppLayout() {
   const { isDark, toggle } = useTheme();
   const location = useLocation();
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const currentPath = location.pathname + location.search;
 
-  const sidebarContent = (
-    <nav className="flex flex-col gap-1 p-2">
-      <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Navigation</div>
-      {navItems.map((item) => (
-        <NavLink
-          key={item.path}
-          {...item}
-          isActive={currentPath === item.path || (item.path === "/" && currentPath === "/")}
-          onClick={() => setSheetOpen(false)}
-        />
-      ))}
-    </nav>
-  );
-
   return (
-    <div className="flex h-screen">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex md:w-56 flex-col border-r bg-sidebar">
-        <div className="flex items-center gap-2 px-4 py-3 border-b">
-          <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-6 w-6" />
-          <span className="font-semibold text-sm">Edmx Tools</span>
-        </div>
-        <div className="flex-1 overflow-y-auto">{sidebarContent}</div>
-        <Separator />
-        <div className="p-3 text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} bitesinbyte.com
-        </div>
-      </aside>
+    <div className="min-h-screen flex flex-col">
+      {/* Fixed top navbar */}
+      <header className="fixed top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-sm transition-all duration-300">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+            <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-7 w-7" />
+            <span className="font-semibold text-sm tracking-tight">EDMX Tools</span>
+          </Link>
 
-      {/* Main Area */}
-      <div className="flex flex-col flex-1 min-w-0">
-        {/* Header */}
-        <header className="flex items-center justify-between border-b px-4 py-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex items-center gap-2">
-            {/* Mobile hamburger */}
-            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-              <SheetTrigger render={
-                <Button variant="ghost" size="icon" className="md:hidden" />
-              }>
-                <Menu className="h-5 w-5" />
-              </SheetTrigger>
-              <SheetContent side="left" className="w-56 p-0">
-                <SheetTitle className="flex items-center gap-2 px-4 py-3 border-b">
-                  <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-6 w-6" />
-                  <span className="font-semibold text-sm">Edmx Tools</span>
-                </SheetTitle>
-                {sidebarContent}
-              </SheetContent>
-            </Sheet>
-            <div className="flex items-center gap-2 md:hidden">
-              <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-5 w-5" />
-              <span className="font-semibold text-sm">Edmx Tools</span>
-            </div>
-          </div>
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-1">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                {...item}
+                isActive={currentPath === item.path}
+              />
+            ))}
+          </nav>
+
+          {/* Right side actions */}
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger render={
-                <Button variant="ghost" size="icon" onClick={toggle} />
+                <button
+                  onClick={toggle}
+                  className="relative inline-flex items-center justify-center rounded-md h-10 w-10 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                />
               }>
-                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                <Sun className={cn("h-4 w-4 transition-all", isDark ? "rotate-0 scale-100" : "-rotate-90 scale-0 absolute")} />
+                <Moon className={cn("h-4 w-4 transition-all", isDark ? "rotate-90 scale-0 absolute" : "rotate-0 scale-100")} />
               </TooltipTrigger>
               <TooltipContent>Toggle theme</TooltipContent>
             </Tooltip>
-            <HeaderIconLink href="https://www.bitesinbyte.com" tooltip="Website">
-              <Globe className="h-4 w-4" />
-            </HeaderIconLink>
-            <HeaderIconLink href="https://github.com/bitesinbyte/edmx-tools" tooltip="GitHub">
-              <GitHubIcon className="h-4 w-4" />
-            </HeaderIconLink>
-            <HeaderIconLink href="https://blogs.bitesinbyte.com" tooltip="Blog">
-              <BookOpen className="h-4 w-4" />
-            </HeaderIconLink>
-            <HeaderIconLink href="https://links.bitesinbyte.com" tooltip="Links">
-              <Share2 className="h-4 w-4" />
-            </HeaderIconLink>
-            <HeaderIconLink href="https://ko-fi.com/bitesinbyte" tooltip="Support">
-              <Heart className="h-4 w-4" />
-            </HeaderIconLink>
+
+            {/* Mobile hamburger */}
+            <button
+              className="md:hidden rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Open menu"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
-        </header>
+        </div>
 
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <Outlet />
-        </main>
+        {/* Mobile nav */}
+        {mobileOpen && (
+          <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-sm">
+            <nav className="flex flex-col px-4 py-3 gap-1">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    currentPath === item.path
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        )}
+      </header>
 
-        {/* Footer */}
-        <footer className="border-t px-4 py-3 text-xs text-muted-foreground flex flex-wrap justify-between gap-2">
-          <span>&copy; {new Date().getFullYear()} <strong>bitesinbyte.com</strong> | <a href="https://github.com/bitesinbyte/edmx-tools/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="underline">MIT License</a></span>
-          <span>Thanks to <a href="https://github.com/shashisadasivan" target="_blank" rel="noopener noreferrer" className="underline font-medium">shashisadasivan</a> for EDMXTrimmer inspiration</span>
-        </footer>
-      </div>
+      {/* Content */}
+      <main className="flex-1 pt-14">
+        <Outlet />
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50">
+        <div className="mx-auto max-w-5xl px-4 py-12">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+            {/* Brand */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <img src="/favicons/android-chrome-192x192.png" alt="Logo" className="h-7 w-7" />
+                <span className="font-semibold text-sm">EDMX Tools</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Client-side tools for EDMX &amp; OData metadata. No data leaves your browser.
+              </p>
+            </div>
+
+            {/* Navigation */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold">Navigation</h4>
+              <nav className="flex flex-col gap-2">
+                {[{ path: "/trim", label: "Trimmer" }, { path: "/explore", label: "Explorer" }, { path: "/convert?type=open-api-json", label: "OpenAPI JSON" }, { path: "/convert?type=open-api-yml", label: "OpenAPI YAML" }].map((item) => (
+                  <Link key={item.path} to={item.path} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
+            {/* Connect */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold">Connect</h4>
+              <div className="flex items-center gap-1">
+                <IconLink href="https://github.com/bitesinbyte/edmx-tools" tooltip="GitHub"><GitHubIcon className="h-4 w-4" /></IconLink>
+                <IconLink href="https://www.bitesinbyte.com" tooltip="Website"><Globe className="h-4 w-4" /></IconLink>
+                <IconLink href="https://blogs.bitesinbyte.com" tooltip="Blog"><BookOpen className="h-4 w-4" /></IconLink>
+                <IconLink href="https://links.bitesinbyte.com" tooltip="Links"><Share2 className="h-4 w-4" /></IconLink>
+                <IconLink href="https://ko-fi.com/bitesinbyte" tooltip="Support"><Heart className="h-4 w-4" /></IconLink>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 border-t border-border/50 pt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span>&copy; {new Date().getFullYear()} <strong className="text-foreground/70">bitesinbyte.com</strong> | <a href="https://github.com/bitesinbyte/edmx-tools/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">MIT License</a></span>
+            <span>Thanks to <a href="https://github.com/shashisadasivan" target="_blank" rel="noopener noreferrer" className="font-medium hover:text-foreground transition-colors">shashisadasivan</a> for EDMXTrimmer inspiration</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
