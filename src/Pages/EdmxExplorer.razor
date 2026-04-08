@@ -1,5 +1,4 @@
 @page "/explore"
-@inherits ComponentBase
 @inject NotificationService NotificationService
 
 <PageTitle>bitesinbyte | Edmx Tools | Edmx Explorer</PageTitle>
@@ -10,7 +9,8 @@
     <RadzenLabel Text="Select Entity" Component="DropDownVirtualization"
         Style="margin-right: 8px; vertical-align: middle;" />
     <RadzenDropDown AllowClear="true" @bind-Value=selectedEntity AllowVirtualization="true"
-        Name="DropDownVirtualization" AllowFiltering="true" Data=@entities SelectedItemChanged="@OnSelectedEntityChange"
+        Name="DropDownVirtualization" AllowFiltering="true" Data=@entityNames
+        SelectedItemChanged="@OnSelectedEntityChange"
         Style="width: 100%; max-width: 400px;" />
 </div>
 
@@ -33,95 +33,115 @@
 </RadzenDataGrid>
 
 @code {
-    public string XmlData { get; set; }
+    private string? XmlData;
+    private string selectedEntity = string.Empty;
+    private List<EntityProperty> selectedEntityProperties = new();
+    private bool isEnumType;
+    private List<System.Xml.XmlNode> entitiesAndEnumCache = new();
 
-    string selectedEntity = string.Empty;
-    List<string> entities
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(XmlData))
-            {
-                return entitiesAndEnum.Select(n => n.Attributes["Name"].Value).ToList();
-            }
-            return new();
-        }
-    }
-    List<EntityProperty> selectedEntityProperties = new List<EntityProperty>();
-    List<EntityProperty> propertyRows = new();
-    bool isEnumType = false;
-    private List<System.Xml.XmlNode> entitiesAndEnum
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(XmlData))
-            {
-                return Helpers.XmlHelpers.GetEntityAndEnumTypes(XmlData);
-            }
-            return new();
-        }
-    }
+    private List<string> entityNames => entitiesAndEnumCache
+        .Select(n => n.Attributes?["Name"]?.Value ?? string.Empty)
+        .Where(n => !string.IsNullOrEmpty(n))
+        .ToList();
+
     protected override void OnParametersSet()
     {
+        if (!string.IsNullOrEmpty(XmlData))
+        {
+            try
+            {
+                entitiesAndEnumCache = Helpers.XmlHelpers.GetEntityAndEnumTypes(XmlData);
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Parse Error",
+                    $"Failed to parse EDMX file: {ex.Message}");
+                entitiesAndEnumCache = new();
+            }
+        }
+        else
+        {
+            entitiesAndEnumCache = new();
+        }
 
         selectedEntityProperties = new();
-        propertyRows = new();
         isEnumType = false;
     }
-    void OnSelectedEntityChange(dynamic args)
+
+    void OnSelectedEntityChange(object args)
     {
-        selectedEntity = args;
-        if (entities.Any(x => x.Equals(selectedEntity, StringComparison.OrdinalIgnoreCase)))
+        if (args is not string selected) return;
+        selectedEntity = selected;
+
+        if (entityNames.Contains(selectedEntity, StringComparer.OrdinalIgnoreCase))
         {
             selectedEntityProperties = GetEntityProperties();
         }
     }
+
     private List<EntityProperty> GetEntityProperties()
     {
-        propertyRows = new();
         isEnumType = false;
-        var selectedEntityData = entitiesAndEnum
-        .FirstOrDefault(x => x.Attributes["Name"].Value
-        .Equals(selectedEntity, StringComparison.OrdinalIgnoreCase));
 
-        if (selectedEntityData == null)
+        var selectedEntityData = entitiesAndEnumCache
+            .FirstOrDefault(x => x.Attributes?["Name"]?.Value?
+                .Equals(selectedEntity, StringComparison.OrdinalIgnoreCase) == true);
+
+        if (selectedEntityData is null)
         {
-            NotificationService.Notify(NotificationSeverity.Error, "Error", $"Entity {selectedEntity} not found");
-            return propertyRows;
+            NotificationService.Notify(NotificationSeverity.Error, "Error",
+                $"Entity {selectedEntity} not found");
+            return new();
         }
 
+        var childNodes = selectedEntityData.ChildNodes.Cast<System.Xml.XmlNode>().ToList();
 
-        var properties = selectedEntityData.ChildNodes.Cast<System.Xml.XmlNode>()
-        .Where(navProp => navProp.Name.Equals("Property")).ToList();
+        // Try "Property" nodes first, fall back to "Member" for enums
+        var properties = childNodes
+            .Where(n => n.Name.Equals("Property", StringComparison.Ordinal))
+            .ToList();
+
         if (!properties.Any())
         {
-            properties = selectedEntityData.ChildNodes.Cast<System.Xml.XmlNode>()
-            .Where(navProp => navProp.Name.Equals("Member")).ToList();
+            properties = childNodes
+                .Where(n => n.Name.Equals("Member", StringComparison.Ordinal))
+                .ToList();
         }
-        var keys = selectedEntityData.ChildNodes.Cast<System.Xml.XmlNode>()
-        .FirstOrDefault(navProp => navProp.Name.Equals("Key"))?
-        .ChildNodes.Cast<System.Xml.XmlNode>()
-        .Where(x => x.Name.Equals("PropertyRef"))?
-        .Select(x => x.Attributes["Name"].Value)?
-        .ToList();
+
+        var keys = childNodes
+            .FirstOrDefault(n => n.Name.Equals("Key", StringComparison.Ordinal))?
+            .ChildNodes.Cast<System.Xml.XmlNode>()
+            .Where(x => x.Name.Equals("PropertyRef", StringComparison.Ordinal))
+            .Select(x => x.Attributes?["Name"]?.Value)
+            .Where(v => v is not null)
+            .ToList();
+
+        var result = new List<EntityProperty>();
 
         foreach (var property in properties)
         {
-            var row = new EntityProperty
-                {
-                    Name = property.Attributes["Name"]?.Value
-                };
+            var name = property.Attributes?["Name"]?.Value ?? string.Empty;
+            var value = property.Attributes?["Value"]?.Value;
+            var nullableAttr = property.Attributes?["Nullable"]?.Value;
 
-            if (keys?.Any() != null)
+            var row = new EntityProperty
             {
-                row.Key = keys.Contains(row.Name);
+                Name = name,
+                Type = property.Attributes?["Type"]?.Value,
+                // Nullable defaults to true in OData unless explicitly set to "false"
+                Nullable = !string.Equals(nullableAttr, "false", StringComparison.OrdinalIgnoreCase),
+                Key = keys?.Contains(name) ?? false,
+                Value = value
+            };
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                isEnumType = true;
             }
-            row.Nullable = string.IsNullOrEmpty(property.Attributes["Nullable"]?.Value);
-            row.Type = property.Attributes["Type"]?.Value;
-            row.Value = property.Attributes["Value"]?.Value;
-            isEnumType = !string.IsNullOrEmpty(row.Value);
-            propertyRows.Add(row);
+
+            result.Add(row);
         }
-        return propertyRows;
+
+        return result;
     }
 }

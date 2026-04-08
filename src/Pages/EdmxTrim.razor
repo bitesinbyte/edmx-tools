@@ -1,5 +1,6 @@
 @page "/Trim"
 @inject IJSRuntime JSRuntime
+@inject NotificationService NotificationService
 
 <PageTitle>bitesinbyte | Edmx Tools | Edmx Trimmer</PageTitle>
 
@@ -13,14 +14,14 @@
                     <RadzenLabel Text="Select Entity" Component="DropDownVirtualization"
                         Style="margin-right: 8px; vertical-align: middle;" />
                     <RadzenDropDown AllowClear="true" AllowVirtualization="true" @bind-Value=entity
-                        Name="DropDownVirtualization" AllowFiltering="true" Data=@entities
+                        Name="DropDownVirtualization" AllowFiltering="true" Data=@availableEntities
                         SelectedItemChanged="@OnSelectedEntityChange" Style="width: 100%; max-width: 400px;" />
                 </div>
 
-                @foreach (var selectedEntity in selectedEntites)
+                @foreach (var selectedEntity in selectedEntities)
                 {
                     <RadzenButton ButtonStyle="ButtonStyle.Secondary" Shade="Shade.Lighter" class="rz-shadow-0"
-                        id="@selectedEntity" Click="@((e) => HandlebadgeClose(selectedEntity))">
+                        id="@selectedEntity" Click="@(_ => HandleBadgeClose(selectedEntity))">
                         @selectedEntity
                         <RadzenBadge Shade="Shade.Lighter" BadgeStyle="BadgeStyle.Primary" IsPill="true" Text="X" />
                     </RadzenButton>
@@ -32,7 +33,7 @@
                         <RadzenCheckBox @bind-Value=@ExcludeSelected Name="ExcludeSelected" />
                         <RadzenLabel Text="Exclude Selected" Component="ExcludeSelected"
                             Style="margin-left: 8px; vertical-align: middle;" />
-                        <RadzenButton Click="@HandleTrim">
+                        <RadzenButton Click="@HandleTrim" Disabled="@(!selectedEntities.Any())">
                             Trim
                         </RadzenButton>
                     </div>
@@ -45,57 +46,96 @@
             </RadzenCard>
         </RadzenStepsItem>
     </Steps>
-
 </RadzenSteps>
 
 @code {
-    public string XmlData { get; set; }
-    int selectedIndex = 0;
-    private List<string> entities
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(XmlData))
-            {
-                return Helpers.XmlHelpers.GetAllEntities(XmlData);
-            }
-            return new();
-        }
-    }
-    private List<string> selectedEntites = new List<string>();
+    private string? XmlData;
+    private int selectedIndex;
+    private List<string> allEntities = new();
+    private List<string> selectedEntities = new();
     private string entity = string.Empty;
-    private bool ExcludeSelected = false;
+    private bool ExcludeSelected;
     private string trimmedXmlData = string.Empty;
-    void OnSelectedEntityChange(dynamic args)
+
+    private List<string> availableEntities => allEntities
+        .Where(e => !selectedEntities.Contains(e, StringComparer.OrdinalIgnoreCase))
+        .OrderBy(e => e)
+        .ToList();
+
+    protected override void OnParametersSet()
     {
-        entity = args;
-        if (!selectedEntites.Any(x => x.Equals(entity, StringComparison.OrdinalIgnoreCase)) &&
-        entities.Any(x => x.Equals(entity, StringComparison.OrdinalIgnoreCase)))
+        if (!string.IsNullOrEmpty(XmlData))
         {
-            selectedEntites.Add(entity);
-            entities.Remove(entity);
+            try
+            {
+                allEntities = Helpers.XmlHelpers.GetAllEntities(XmlData);
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Parse Error",
+                    $"Failed to parse EDMX file: {ex.Message}");
+                allEntities = new();
+            }
+        }
+        else
+        {
+            allEntities = new();
+        }
+
+        selectedEntities = new();
+        trimmedXmlData = string.Empty;
+        selectedIndex = 0;
+    }
+
+    void OnSelectedEntityChange(object args)
+    {
+        if (args is not string selected) return;
+
+        entity = selected;
+
+        if (!selectedEntities.Contains(entity, StringComparer.OrdinalIgnoreCase) &&
+            allEntities.Contains(entity, StringComparer.OrdinalIgnoreCase))
+        {
+            selectedEntities.Add(entity);
             entity = string.Empty;
         }
     }
-    void HandlebadgeClose(string entity)
+
+    void HandleBadgeClose(string entityToRemove)
     {
-        selectedEntites.Remove(entity);
-        entities.Add(entity);
+        selectedEntities.Remove(entityToRemove);
     }
 
     void HandleTrim()
     {
-        trimmedXmlData = Helpers.XmlHelpers.Trim(XmlData, selectedEntites, ExcludeSelected);
-        selectedIndex = 1;
+        if (string.IsNullOrEmpty(XmlData) || !selectedEntities.Any())
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "No Selection",
+                "Please select at least one entity.");
+            return;
+        }
+
+        try
+        {
+            trimmedXmlData = Helpers.XmlHelpers.Trim(XmlData, selectedEntities, ExcludeSelected);
+            selectedIndex = 1;
+            NotificationService.Notify(NotificationSeverity.Success, "Trim Complete",
+                "EDMX file trimmed successfully.");
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Trim Failed",
+                $"Error: {ex.Message}");
+        }
     }
+
     async Task DownloadTrimXmlFile()
     {
-        var byteArray = System.Text.Encoding.ASCII.GetBytes(trimmedXmlData);
+        var byteArray = System.Text.Encoding.UTF8.GetBytes(trimmedXmlData);
         var stream = new MemoryStream(byteArray);
         var fileName = "trimmedMetadata.xml";
 
         using var streamRef = new DotNetStreamReference(stream: stream);
-
         await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
 }

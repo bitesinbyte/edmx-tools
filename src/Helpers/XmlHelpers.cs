@@ -1,81 +1,115 @@
 using System.Xml;
 
 namespace EdmxTools.Helpers;
+
 public static class XmlHelpers
 {
-    private const string ENTITY_SET = "EntitySet";
-    private const string ENTITY_TYPE = "EntityType";
-    private const string ENUM_TYPE = "EnumType";
-    private const string ATTRIBUTE_NAME = "Name";
-    private const string NAVIGATION_PROPERTY = "NavigationProperty";
-    private const string ACTION = "Action";
-    private const string ATTRIBUTE_TYPE = "Type";
-    private const string ATTRIBUTE_NAMESPACE = "Namespace";
-    private const string TAG_SCHEMA = "Schema";
+    private const string EntitySet = "EntitySet";
+    private const string EntityType = "EntityType";
+    private const string EnumType = "EnumType";
+    private const string AttributeName = "Name";
+    private const string NavigationProperty = "NavigationProperty";
+    private const string Action = "Action";
+    private const string AttributeType = "Type";
+    private const string AttributeNamespace = "Namespace";
+    private const string TagSchema = "Schema";
+
     public static List<string> GetAllEntities(string metadata)
     {
         var xmlDocument = new XmlDocument();
         xmlDocument.LoadXml(metadata);
 
-        var nodes = xmlDocument.GetElementsByTagName(ENTITY_SET).Cast<XmlNode>();
-        var entities = nodes.Select(n => n.Attributes[ATTRIBUTE_NAME].Value).ToList();
-        return entities;
+        return xmlDocument
+            .GetElementsByTagName(EntitySet)
+            .Cast<XmlNode>()
+            .Select(n => n.Attributes![AttributeName]!.Value)
+            .ToList();
     }
+
     public static string Trim(string metadata, List<string> entitiesSelected, bool excludeSelected)
     {
-        var trimmedData = string.Empty;
         var xmlDocument = new XmlDocument();
         xmlDocument.LoadXml(metadata);
 
-        var entityNamespace = xmlDocument.GetElementsByTagName(TAG_SCHEMA)[0].Attributes[ATTRIBUTE_NAMESPACE].Value + ".";
+        var entityNamespace = xmlDocument
+            .GetElementsByTagName(TagSchema)[0]!
+            .Attributes![AttributeNamespace]!.Value + ".";
 
-        var entitySets = xmlDocument.GetElementsByTagName(ENTITY_SET).Cast<XmlNode>().ToList();
-        var entityTypes = xmlDocument.GetElementsByTagName(ENTITY_TYPE).Cast<XmlNode>().ToList();
-        var entityActions = xmlDocument.GetElementsByTagName(ACTION).Cast<XmlNode>().ToList();
+        var entitySets = xmlDocument.GetElementsByTagName(EntitySet).Cast<XmlNode>().ToList();
+        var entityTypes = xmlDocument.GetElementsByTagName(EntityType).Cast<XmlNode>().ToList();
+        var entityActions = xmlDocument.GetElementsByTagName(Action).Cast<XmlNode>().ToList();
 
-        var entityTypesFound = new List<string>();
+        // When excludeSelected is true, keep entities NOT in the selection list
+        // When excludeSelected is false, keep entities IN the selection list
+        var entitiesKeep = excludeSelected
+            ? entitySets.Where(n => !entitiesSelected.Contains(n.Attributes![AttributeName]!.Value)).ToList()
+            : entitySets.Where(n => entitiesSelected.Contains(n.Attributes![AttributeName]!.Value)).ToList();
 
-        var entitiesKeep = entitySets.Where(n => entitiesSelected.Contains(n.Attributes[ATTRIBUTE_NAME].Value)).ToList();
-        entitiesKeep.ForEach(n =>
-        {
-            string entityType = n.Attributes[ENTITY_TYPE].Value;
-            entityType = entityType.Replace(entityNamespace, "");
-            entityTypesFound.Add(entityType);
-        });
+        var entityTypesFound = entitiesKeep
+            .Select(n => n.Attributes![AttributeType]!.Value.Replace(entityNamespace, ""))
+            .ToList();
 
         // Remove entities not required (EntitySet)
-        entitySets.Except(entitiesKeep).ToList().ForEach(n => n.ParentNode.RemoveChild(n));
-
-        //Remove unwanted Nodes in the Entity Set
-        entitiesKeep.ForEach(n =>
+        foreach (var node in entitySets.Except(entitiesKeep))
         {
-            // Remove Node NavigationProperty
-            var navProperties = n.ChildNodes.Cast<XmlNode>()
-                .Where(navProp => navProp.Name.Equals(NAVIGATION_PROPERTY)).ToList();
-            navProperties
-                .ForEach(navProp => navProp.ParentNode.RemoveChild(navProp));
-        });
+            node.ParentNode?.RemoveChild(node);
+        }
 
-        // Remove all navigation properties
+        // Remove NavigationProperty nodes from kept EntitySets
+        foreach (var node in entitiesKeep)
+        {
+            var navProperties = node.ChildNodes
+                .Cast<XmlNode>()
+                .Where(navProp => navProp.Name.Equals(NavigationProperty, StringComparison.Ordinal))
+                .ToList();
 
-        xmlDocument.GetElementsByTagName(NAVIGATION_PROPERTY).Cast<XmlNode>().Where(navProp => !entityTypesFound.Any(s => navProp.Attributes[ATTRIBUTE_TYPE].Value.Contains(s))).ToList()
-            .ForEach(n => n.ParentNode.RemoveChild(n));
+            foreach (var navProp in navProperties)
+            {
+                navProp.ParentNode?.RemoveChild(navProp);
+            }
+        }
 
-        // Remove entity not required (EntityType)
-        var entityTypesKeep = entityTypes.Where(n => entityTypesFound.Contains(n.Attributes[ATTRIBUTE_NAME].Value)).ToList();
-        entityTypes.Except(entityTypesKeep).ToList().ForEach(n => n.ParentNode.RemoveChild(n));
+        // Remove orphaned navigation properties (those referencing removed entity types)
+        var orphanedNavProps = xmlDocument
+            .GetElementsByTagName(NavigationProperty)
+            .Cast<XmlNode>()
+            .Where(navProp => !entityTypesFound.Any(s =>
+                navProp.Attributes![AttributeType]!.Value.Contains(s, StringComparison.Ordinal)))
+            .ToList();
+
+        foreach (var node in orphanedNavProps)
+        {
+            node.ParentNode?.RemoveChild(node);
+        }
+
+        // Remove entity types not required
+        var entityTypesKeep = entityTypes
+            .Where(n => entityTypesFound.Contains(n.Attributes![AttributeName]!.Value))
+            .ToList();
+
+        foreach (var node in entityTypes.Except(entityTypesKeep))
+        {
+            node.ParentNode?.RemoveChild(node);
+        }
 
         // Remove all Actions
-        entityActions.ForEach(n => n.ParentNode.RemoveChild(n));
+        foreach (var node in entityActions)
+        {
+            node.ParentNode?.RemoveChild(node);
+        }
+
         return xmlDocument.OuterXml;
     }
+
     public static List<XmlNode> GetEntityAndEnumTypes(string metadata)
     {
         var xmlDocument = new XmlDocument();
         xmlDocument.LoadXml(metadata);
-        var entityType = xmlDocument.GetElementsByTagName(ENTITY_TYPE).Cast<XmlNode>().ToList();
-        var enumType = xmlDocument.GetElementsByTagName(ENUM_TYPE).Cast<XmlNode>();
-        entityType.AddRange(enumType);
-        return entityType;
+
+        var entityTypes = xmlDocument.GetElementsByTagName(EntityType).Cast<XmlNode>().ToList();
+        var enumTypes = xmlDocument.GetElementsByTagName(EnumType).Cast<XmlNode>();
+        entityTypes.AddRange(enumTypes);
+
+        return entityTypes;
     }
 }

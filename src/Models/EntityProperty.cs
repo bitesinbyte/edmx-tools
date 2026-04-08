@@ -1,10 +1,10 @@
 namespace EdmxTools.Models;
 
-public class EntityProperty
+public record EntityProperty
 {
-    public string Name { get; set; }
-    public string Type { get; set; }
-    public bool Nullable { get; set; }
-    public bool Key { get; set; }
-    public string Value { get; set; }
+    public string Name { get; init; } = string.Empty;
+    public string? Type { get; init; }
+    public bool Nullable { get; init; }
+    public bool Key { get; init; }
+    public string? Value { get; init; }
 }

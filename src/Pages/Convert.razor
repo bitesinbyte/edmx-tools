@@ -1,93 +1,123 @@
 @page "/convert"
 @inject NavigationManager NavManager
 @inject TooltipService tooltipService
+@inject NotificationService NotificationService
 @inject IJSRuntime JSRuntime
+@implements IDisposable
 
 <PageTitle>bitesinbyte | Edmx Tools | Convert Edmx to @ConvertType</PageTitle>
 <RadzenText TextStyle="TextStyle.H4">Convert To @ConvertType</RadzenText>
 <Upload @bind-XmlData=XmlData />
-<RadzenButton Click="@HandleConvert" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary"
-    ButtonType="ButtonType.Button"
-    MouseEnter="@(args => ShowTooltip(args,"Convert Edmx", new TooltipOptions(){ Position = TooltipPosition.Bottom }))">
-    Convert To @ConvertType</RadzenButton>
-<RadzenButton Click="@HandleDownload" Variant="Variant.Filled" Icon="file_download" ButtonStyle="ButtonStyle.Primary"
-    ButtonType="ButtonType.Button" Disabled="@DownloadDisabled" Text="Download"
-    MouseEnter="@(args => ShowTooltip(args,"Download The Converted Edmx", new TooltipOptions(){ Position = TooltipPosition.Bottom }))" />
+
+<RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" class="rz-mt-4">
+    <RadzenButton Click="@HandleConvert" Variant="Variant.Filled" ButtonStyle="ButtonStyle.Primary"
+        ButtonType="ButtonType.Button" Disabled="@isConverting" Text="@convertButtonText"
+        MouseEnter="@(args => ShowTooltip(args, "Convert Edmx", new TooltipOptions { Position = TooltipPosition.Bottom }))" />
+    <RadzenButton Click="@HandleDownload" Variant="Variant.Filled" Icon="file_download"
+        ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Button" Disabled="@DownloadDisabled" Text="Download"
+        MouseEnter="@(args => ShowTooltip(args, "Download The Converted File", new TooltipOptions { Position = TooltipPosition.Bottom }))" />
+</RadzenStack>
+
 @code {
     private string convertedValue = string.Empty;
-    public string XmlData { get; set; }
-    bool DownloadDisabled => string.IsNullOrEmpty(convertedValue);
-    private string ConvertType
+    private string? XmlData;
+    private bool isConverting;
+
+    private bool DownloadDisabled => string.IsNullOrEmpty(convertedValue) || isConverting;
+
+    private string convertButtonText => isConverting ? "Converting..." : $"Convert To {ConvertType}";
+
+    private string ConvertType => type switch
     {
-        get
-        {
-            if (type == "open-api-yml")
-            {
-                return "Open Api YML";
-            }
-            else if (type == "open-api-json")
-            {
-                return "Open Api JSON";
-            }
-            return string.Empty;
-        }
-    }
+        "open-api-yml" => "Open Api YML",
+        "open-api-json" => "Open Api JSON",
+        _ => string.Empty
+    };
+
     private string type = string.Empty;
+
     protected override void OnInitialized()
     {
         NavManager.LocationChanged += OnLocationChanged;
+        SetType();
     }
+
     protected override void OnParametersSet()
     {
         SetType();
-        StateHasChanged();
     }
+
     private void SetType()
     {
         var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
-
-        var foundQueryParameter = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("type", out
-        var tempConverType);
-        if (foundQueryParameter)
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query)
+            .TryGetValue("type", out var tempConvertType))
         {
-            type = tempConverType;
+            type = tempConvertType.ToString();
         }
     }
-    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         SetType();
-        StateHasChanged();
         convertedValue = string.Empty;
+        StateHasChanged();
     }
+
     async Task HandleDownload()
     {
-        var fileName = type; ;
-        if (type == "open-api-yml")
+        var extension = type switch
         {
-            fileName += ".yml";
-        }
-        else if (type == "open-api-json")
-        {
-            fileName += ".json";
-        }
-        var byteArray = System.Text.Encoding.ASCII.GetBytes(convertedValue);
+            "open-api-yml" => ".yml",
+            "open-api-json" => ".json",
+            _ => ".txt"
+        };
+
+        var fileName = $"{type}{extension}";
+        var byteArray = System.Text.Encoding.UTF8.GetBytes(convertedValue);
         var stream = new MemoryStream(byteArray);
 
         using var streamRef = new DotNetStreamReference(stream: stream);
-
         await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
-    void HandleConvert()
+
+    async Task HandleConvert()
     {
-        if (type == "open-api-yml")
+        if (string.IsNullOrEmpty(XmlData))
         {
-            convertedValue = OpenApiHelper.Convert(XmlData, Microsoft.OpenApi.OpenApiFormat.Yaml);
+            NotificationService.Notify(NotificationSeverity.Warning, "No File", "Please upload an EDMX file first.");
+            return;
         }
-        else if (type == "open-api-json")
+
+        try
         {
-            convertedValue = OpenApiHelper.Convert(XmlData, Microsoft.OpenApi.OpenApiFormat.Json);
+            isConverting = true;
+            StateHasChanged();
+
+            var asYaml = type == "open-api-yml";
+            convertedValue = await Helpers.OpenApiHelper.ConvertAsync(XmlData, asYaml);
+
+            NotificationService.Notify(NotificationSeverity.Success, "Conversion Complete",
+                $"Successfully converted to {ConvertType}.");
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Conversion Failed",
+                $"Error: {ex.Message}");
+            convertedValue = string.Empty;
+        }
+        finally
+        {
+            isConverting = false;
+            StateHasChanged();
         }
     }
-    void ShowTooltip(ElementReference elementReference, string content, TooltipOptions options = null) =>
-    tooltipService.Open(elementReference, content, options);
+
+    void ShowTooltip(ElementReference elementReference, string content, TooltipOptions? options = null) =>
+        tooltipService.Open(elementReference, content, options);
+
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= OnLocationChanged;
+    }
 }

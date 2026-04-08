@@ -4,15 +4,17 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="A Set of tools for EDMX or OData metadata files, Tools Like EDMX Explorer, Edmx Trimmer, EDMX to open api converter, EDMX to JSON converter">
-    <meta name="keywords" content="EDMX, open api, d365 fo, odata, odata metadata, edmx explorer" />
-    <title>EdmxTools</title>
+    <meta name="description"
+        content="A set of tools for EDMX and OData metadata files: EDMX Explorer, EDMX Trimmer, EDMX to OpenAPI JSON/YAML converter. All processing happens in your browser." />
+    <meta name="keywords"
+        content="EDMX, OpenAPI, OData, EDMX Trimmer, EDMX Explorer, EDMX to JSON, EDMX to YAML, D365 FO, OData metadata" />
+    <title>Edmx Tools | bitesinbyte</title>
     <base href="/" />
     <link rel="icon" type="image/png" href="favicons/favicon.ico" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" href="css/app.css">
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css">
-    <link rel="stylesheet" href="_content/Radzen.Blazor/css/standard.css">
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-base.css" />
+    <link rel="stylesheet" href="_content/Radzen.Blazor/css/standard.css" />
     <link href="manifest.webmanifest" rel="manifest" />
     <link rel="apple-touch-icon" sizes="512x512" href="favicons/android-chrome-512x512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="favicons/android-chrome-192x192.png" />
@@ -20,70 +22,73 @@
 
 <body>
     <div id="app" style="margin: 0 auto; width: 100vw; height: 100vh">
-        <div class="text-center pt-3" style="color: purple; font-size: 16pt">
-            Loading...
-        </div>
-        <div class="text-center mt-3">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-                    style="font-size: 16pt; width: 36px; height: 36px; color: purple" />
-        </div>
-        <div class="text-center">
-            <img src="favicons/android-chrome-512x512.png" style="width:30%" alt="logo"/>
+        <div class="loading-container">
+            <img src="favicons/android-chrome-512x512.png" class="loading-logo" alt="Edmx Tools logo" />
+            <div class="loading-text">Loading Edmx Tools...</div>
+            <div class="loading-spinner" role="status" aria-label="Loading">
+                <span class="spinner-border spinner-border-sm"></span>
+            </div>
         </div>
     </div>
-     
+
     <div id="blazor-error-ui">
-        An unhandled error has occurred. <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">X</a>
     </div>
+
     <script>
         window.downloadFileFromStream = async (fileName, contentStreamReference) => {
             const arrayBuffer = await contentStreamReference.arrayBuffer();
             const blob = new Blob([arrayBuffer]);
             const url = URL.createObjectURL(blob);
-            const anchorElement = document.createElement('a');
+            const anchorElement = document.createElement("a");
             anchorElement.href = url;
-            anchorElement.download = fileName ?? '';
+            anchorElement.download = fileName ?? "";
             anchorElement.click();
             anchorElement.remove();
             URL.revokeObjectURL(url);
-        }
-    </script>
-    <script>
+        };
+
         function removeStyleSheet(href) {
-            document.querySelector('link[href$="'+href+'"]').remove()
+            const link = document.querySelector('link[href$="' + href + '"]');
+            if (link) link.remove();
         }
-        function applyDark(href) {
+
+        function addCss(fileName) {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = fileName;
+            document.head.appendChild(link);
+        }
+
+        function applyDark() {
             addCss("_content/Radzen.Blazor/css/dark.css");
             removeStyleSheet("_content/Radzen.Blazor/css/standard.css");
         }
-        function applyLight(href) {
+
+        function applyLight() {
             addCss("_content/Radzen.Blazor/css/standard.css");
             removeStyleSheet("_content/Radzen.Blazor/css/dark.css");
         }
-        
-        function addCss(fileName) {
-            var head = document.head;
-            var link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = fileName;
-
-            head.appendChild(link);
-        }
-
     </script>
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/Radzen.Blazor/Radzen.Blazor.js"></script>
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-F9EC1KWJNY"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-F9EC1KWJNY');
+        gtag("js", new Date());
+        gtag("config", "G-F9EC1KWJNY");
     </script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("service-worker.js");
+        }
+    </script>
 </body>
 
 </html>

@@ -1,38 +1,35 @@
-﻿using System.Xml;
 using System.Xml.Linq;
-using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.OData;
 
-namespace EdmxTools;
+namespace EdmxTools.Helpers;
 
 public static class OpenApiHelper
 {
-    public static string Convert(string xml, OpenApiFormat openApiFormat)
+    public static async Task<string> ConvertAsync(string xml, bool asYaml)
     {
         var settings = new OpenApiConvertSettings
         {
             OpenApiSpecVersion = OpenApiSpecVersion.OpenApi3_0
         };
-        return Generate(xml, openApiFormat, settings);
-    }
-    private static string Generate(string input, OpenApiFormat format, OpenApiConvertSettings settings)
-    {
-        var edmModel = GetEdmModel(input);
+
+        var edmModel = GetEdmModel(xml);
         var document = edmModel.ConvertToOpenApi(settings);
-        return document.Serialize(settings.OpenApiSpecVersion, format);
+
+        return asYaml
+            ? await document.SerializeAsYamlAsync(OpenApiSpecVersion.OpenApi3_0)
+            : await document.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0);
     }
-    private static IEdmModel GetEdmModel(string input)
+
+    private static Microsoft.OData.Edm.IEdmModel GetEdmModel(string input)
     {
         var parsed = XElement.Parse(input);
-        using XmlReader mainReader = parsed.CreateReader();
-        return CsdlReader.Parse(mainReader, u =>
+        using var mainReader = parsed.CreateReader();
+        return CsdlReader.Parse(mainReader, _ =>
         {
             var referenceParsed = XElement.Parse(input);
-            var referenceReader = referenceParsed.CreateReader();
-            return referenceReader;
+            return referenceParsed.CreateReader();
         });
     }
 }
